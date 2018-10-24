@@ -1,37 +1,33 @@
-// REACT
-import React, { Component } from 'react';
+//externals
+// import ReactDOM from 'react-dom';
+import React from 'react';
 
-// CSS
-import './OpenLayerMap.css'
 
 // OPENLAYERS
 import 'ol/ol.css';
 // import ol from 'ol'
 import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
-import TileVector from 'ol/layer/Vector'
+import LayerVector from 'ol/layer/Vector'
 import SourceVector from 'ol/source/Vector'
 import OSM from 'ol/source/OSM';
+import Wktformat from 'ol/format/WKT'
+import GeomPoint from 'ol/geom/Point'
 
-class OpenLayerMap extends Component{
-
-    render() {
-        return (
-            <div ref="map"> </div>
-        );
-    }
+class OpenLayerMap extends React.Component {
 
     componentDidMount() {
+
         // create feature layer and vector source
-        var featuresLayer = new TileVector({
+        var featuresLayer = new LayerVector({
             source: new SourceVector({
-                features: [],
+                features: []
             })
         });
 
         // create map object with feature layer
         var map = new Map({
-            target: this.refs.map,
+            target: this.refs.mapContainer,
             layers: [
                 //default OSM layer
                 new TileLayer({
@@ -40,17 +36,56 @@ class OpenLayerMap extends Component{
                 featuresLayer
             ],
             view: new View({
-                center: [0, 0], 
-                zoom: 1,
+                center: [-11718716.28195593, 4869217.172379018], //Boulder
+                zoom: 13,
             })
         });
+
+        map.on('click', this.handleMapClick.bind(this));
 
         // save map and layer references to local state
         this.setState({
             map: map,
             featuresLayer: featuresLayer
         });
+
     }
+
+    // pass new features from props into the OpenLayers layer object
+    componentDidUpdate(prevProps, prevState) {
+        this.state.featuresLayer.setSource(
+            new SourceVector({
+                features: this.props.routes
+            })
+        );
+    }
+
+    handleMapClick(event) {
+
+        // create WKT writer
+        var wktWriter = new Wktformat();
+
+        // derive map coordinate (references map from Wrapper Component state)
+        var clickedCoordinate = this.state.map.getCoordinateFromPixel(event.pixel);
+
+        // create Point geometry from clicked coordinate
+        var clickedPointGeom = new GeomPoint(clickedCoordinate);
+
+        // write Point geometry to WKT with wktWriter
+        var clickedPointWkt = wktWriter.writeGeometry(clickedPointGeom);
+
+        // place Flux Action call to notify Store map coordinate was clicked
+        // Actions.setRoutingCoord(clickedPointWkt); ?? what is actions ??
+        console.log(clickedPointWkt);
+
+    }
+
+    render() {
+        return (
+            <div ref="mapContainer"> </div>
+        );
+    }
+
 }
 
-export default OpenLayerMap
+export default OpenLayerMap;
