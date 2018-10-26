@@ -6,8 +6,8 @@ import PropTypes from 'prop-types'
 
 const HIDDEN_SYMBOL = '❓'
 
-const Card = ({ card, feedback, onClick }) => (
-    <div className={`card ${feedback}`} onClick={() => onClick(card)}>
+const Card = ({ card, feedback, index, onClick }) => (
+    <div className={`card ${feedback}`} onClick={() => onClick(index)}>
         <span className="symbol">
             {feedback === 'hidden' ? HIDDEN_SYMBOL : card}
         </span>
@@ -22,6 +22,7 @@ Card.propTypes = {
         'justMismatched',
         'visible',
     ]).isRequired,
+    index: PropTypes.number.isRequired,
     onClick: PropTypes.func.isRequired,
 }
 
