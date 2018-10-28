@@ -1,5 +1,5 @@
 # ReactPWA
-Simple React Tutorial leading to PWA &amp; Webmapping w/ Openlayers #NoTypeScript
+Simple React Tutorials for learning
 
 memory app is the OpenClassRoom Tutorial : 
 https://openclassrooms.com/fr/courses/4664381-realisez-une-application-web-avec-react-js
