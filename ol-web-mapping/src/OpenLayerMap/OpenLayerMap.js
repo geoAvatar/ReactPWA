@@ -13,20 +13,25 @@ import SourceVector from 'ol/source/Vector'
 import OSM from 'ol/source/OSM';
 import Wktformat from 'ol/format/WKT'
 import GeomPoint from 'ol/geom/Point'
+// import { easeIn, easeOut } from 'ol/easing.js'
 
 class OpenLayerMap extends React.Component {
 
     componentDidMount() {
 
         // create feature layer and vector source
-        var featuresLayer = new LayerVector({
+        let featuresLayer = new LayerVector({
             source: new SourceVector({
                 features: []
             })
         });
+        let view = new View({
+            center: [261427.6177675439, 6250705.351981059],
+            zoom: 3
+        })
 
         // create map object with feature layer
-        var map = new Map({
+        let map = new Map({
             target: this.refs.mapContainer,
             layers: [
                 //default OSM layer
@@ -35,10 +40,7 @@ class OpenLayerMap extends React.Component {
                 }),
                 featuresLayer
             ],
-            view: new View({
-                center: [-11718716.28195593, 4869217.172379018], //Boulder
-                zoom: 13,
-            })
+            view: view
         });
 
         map.on('click', this.handleMapClick.bind(this));
@@ -46,7 +48,8 @@ class OpenLayerMap extends React.Component {
         // save map and layer references to local state
         this.setState({
             map: map,
-            featuresLayer: featuresLayer
+            featuresLayer: featuresLayer,
+            view:view
         });
 
     }
@@ -61,28 +64,40 @@ class OpenLayerMap extends React.Component {
     }
 
     handleMapClick(event) {
-
         // create WKT writer
-        var wktWriter = new Wktformat();
+        const wktWriter = new Wktformat();
 
         // derive map coordinate (references map from Wrapper Component state)
-        var clickedCoordinate = this.state.map.getCoordinateFromPixel(event.pixel);
+        const clickedCoordinate = this.state.map.getCoordinateFromPixel(event.pixel);
 
         // create Point geometry from clicked coordinate
-        var clickedPointGeom = new GeomPoint(clickedCoordinate);
+        const clickedPointGeom = new GeomPoint(clickedCoordinate);
 
         // write Point geometry to WKT with wktWriter
-        var clickedPointWkt = wktWriter.writeGeometry(clickedPointGeom);
+        const clickedPointWkt = wktWriter.writeGeometry(clickedPointGeom);
 
         // place Flux Action call to notify Store map coordinate was clicked
         // Actions.setRoutingCoord(clickedPointWkt); ?? what is actions ??
-        console.log(clickedPointWkt);
-
+        console.log(clickedPointWkt)
+       
+        
+        console.log(this.state.map);
+        this.state.view.animate({
+                center: clickedCoordinate,
+                duration: 500
+            });
     }
 
     render() {
         return (
-            <div ref="mapContainer"> </div>
+            <div>
+                <h1 style={{'text-align':'center'}}>ReactMapping</h1>
+
+                <div id='mapContainer'>
+                    <div ref="mapContainer" > </div>
+                </div>
+
+            </div>
         );
     }
 
